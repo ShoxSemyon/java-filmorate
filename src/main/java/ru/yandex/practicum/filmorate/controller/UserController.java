@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IllegalFilmException;
 import ru.yandex.practicum.filmorate.exception.IllegalUserException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -54,7 +55,7 @@ public class UserController {
             return user;
 
         } else {
-            throw new IllegalUserException("Пользователя не существует");
+            throw new UserNotFoundException();
         }
     }
 

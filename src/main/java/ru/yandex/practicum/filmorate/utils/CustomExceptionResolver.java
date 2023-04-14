@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.IllegalFilmException;
 import ru.yandex.practicum.filmorate.exception.IllegalUserException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 
 @Component
 public class CustomExceptionResolver extends AbstractHandlerExceptionResolver {
@@ -22,6 +24,13 @@ public class CustomExceptionResolver extends AbstractHandlerExceptionResolver {
             return modelAndView;
 
         }
+        if (ex instanceof UserNotFoundException || ex instanceof FilmNotFoundException) {
+            modelAndView.setStatus(HttpStatus.NOT_FOUND);
+            modelAndView.addObject("message", "Не найден");
+            return modelAndView;
+
+        }
+
         modelAndView.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         modelAndView.addObject("message", "Another exception was handled");
         return modelAndView;
