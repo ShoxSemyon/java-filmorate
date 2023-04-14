@@ -4,12 +4,9 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.IllegalFilmException;
-import ru.yandex.practicum.filmorate.exception.IllegalUserException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +32,7 @@ public class UserController {
 
         users.put(user.getId(), modificateName(user));
 
-        logger.debug("Пользователь добавлен "+user);
+        logger.debug("Пользователь добавлен " + user);
 
         return user;
     }
@@ -50,7 +47,7 @@ public class UserController {
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), modificateName(user));
 
-            logger.debug("Пользователь обновлён "+user);
+            logger.debug("Пользователь обновлён " + user);
 
             return user;
 

@@ -47,7 +47,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         modificate(film);
-        if (!films.containsKey(film.getId())) throw  new FilmNotFoundException();
+        if (!films.containsKey(film.getId())) throw new FilmNotFoundException();
         if (!validate(film)) throw new IllegalFilmException("Неправильные параметры или фильма не существует");
 
         films.put(film.getId(), film);
