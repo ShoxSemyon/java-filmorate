@@ -1,20 +1,20 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.ToString;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class FilmControllerTest {
-    /** @noinspection SpringJavaInjectionPointsAutowiringInspection*/
+    /**
+     * @noinspection SpringJavaInjectionPointsAutowiringInspection
+     */
     @Autowired
     private MockMvc mockMvc;
 
@@ -28,10 +28,11 @@ public class FilmControllerTest {
                 "}";
 
         mockMvc.perform(post("/films")
-                        .header("Content-Type","application/json")
+                        .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void test1_addFilmWitInvalidDescription() throws Exception {
         String content = "{\n" +
@@ -42,10 +43,11 @@ public class FilmControllerTest {
                 "}";
 
         mockMvc.perform(post("/films")
-                        .header("Content-Type","application/json")
+                        .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void test1_addFilmWitInvalidReleaseDate() throws Exception {
         String content = "{\n" +
@@ -56,10 +58,11 @@ public class FilmControllerTest {
                 "}";
 
         mockMvc.perform(post("/films")
-                        .header("Content-Type","application/json")
+                        .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void test1_addFilmWitInvalidDuration() throws Exception {
         String content = "{\n" +
@@ -70,7 +73,7 @@ public class FilmControllerTest {
                 "}";
 
         mockMvc.perform(post("/films")
-                        .header("Content-Type","application/json")
+                        .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
     }
