@@ -70,7 +70,7 @@ public class FilmController {
 
     protected boolean validate(Film film) {
         return film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28))
-                && film.getDuration().toMinutes()>0;
+                && film.getDuration().toMinutes() > 0;
     }
 
 
