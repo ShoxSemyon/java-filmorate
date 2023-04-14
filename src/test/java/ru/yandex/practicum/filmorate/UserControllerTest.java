@@ -6,7 +6,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,7 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class UserControllerTest {
 
-    /** @noinspection SpringJavaInjectionPointsAutowiringInspection*/
+    /**
+     * @noinspection SpringJavaInjectionPointsAutowiringInspection
+     */
     @Autowired
     private MockMvc mockMvc;
 
@@ -27,10 +28,11 @@ class UserControllerTest {
                 "}";
 
         mockMvc.perform(post("/users")
-                        .header("Content-Type","application/json")
+                        .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void test1_addFilmWithInvalidEmail() throws Exception {
         String content = "{\n" +
@@ -41,10 +43,11 @@ class UserControllerTest {
                 "}";
 
         mockMvc.perform(post("/users")
-                        .header("Content-Type","application/json")
+                        .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void test1_addFilmWithInvalidBirthday() throws Exception {
         String content = "{\n" +
@@ -55,7 +58,7 @@ class UserControllerTest {
                 "}";
 
         mockMvc.perform(post("/users")
-                        .header("Content-Type","application/json")
+                        .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
     }
