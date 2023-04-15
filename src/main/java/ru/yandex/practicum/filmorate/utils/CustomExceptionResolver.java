@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.utils;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,7 +18,7 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 public class CustomExceptionResolver extends AbstractHandlerExceptionResolver {
 
     @Override
-    protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    protected ModelAndView doResolveException(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, Object handler, Exception ex) {
         ModelAndView modelAndView = new ModelAndView(new MappingJackson2JsonView());
         if (ex instanceof IllegalFilmException || ex instanceof IllegalUserException) {
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
