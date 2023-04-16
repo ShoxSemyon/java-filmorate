@@ -1,25 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.PastOrPresent;
-import javax.validation.constraints.Pattern;
-import lombok.Data;
+import lombok.*;
 
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class User {
-    int id;
+
+    @NotNull
+    private long id;
+
     @Email
-    String email;
+    private String email;
 
     @NotBlank
     @Pattern(regexp = "[0-9A-Za-z]+")
-    String login;
+    private String login;
 
-    String name;
+    private String name;
 
     @PastOrPresent
-    LocalDate birthday;
+    private LocalDate birthday;
 }

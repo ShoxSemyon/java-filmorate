@@ -1,27 +1,32 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import lombok.Data;
+import lombok.*;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Film {
-    int id;
+    @NotNull
+    private long id;
 
     @NotBlank
-    String name;
+    private String name;
 
     @Size(max = 200)
-    String description;
+    private String description;
 
-    LocalDate releaseDate;
+    private LocalDate releaseDate;
 
-
-    Duration duration;
+    private Duration duration;
 
     @JsonProperty("duration")
     public long getDurationTimeMinutes() {
