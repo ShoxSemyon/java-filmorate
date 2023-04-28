@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,6 +28,19 @@ public class Film {
     private LocalDate releaseDate;
 
     private Duration duration;
+
+    private Set<Long> userLikeIds;
+
+    public boolean setLike(Long id) {
+
+        return userLikeIds.add(id);
+    }
+
+    public boolean deleteLike(long id) {
+
+        return userLikeIds.remove(id);
+
+    }
 
     @JsonProperty("duration")
     public long getDurationTimeMinutes() {

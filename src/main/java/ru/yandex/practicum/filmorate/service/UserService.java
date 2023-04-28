@@ -72,7 +72,7 @@ public class UserService {
     }
 
     public User getUser(long id) {
-        Optional<User> us = storage.getUserFromStorage()
+        Optional<User> us = storage.getAll()
                 .stream()
                 .filter(user -> user.getId() == id)
                 .findFirst();
@@ -89,7 +89,7 @@ public class UserService {
 
     private List<User> getFriendList(Set<Long> frienList) {
 
-        List<User> flist = new ArrayList<>(storage.getUserFromStorage());
+        List<User> flist = new ArrayList<>(storage.getAll());
 
         flist = flist.stream()
                 .filter(q -> frienList.contains(q.getId()))
@@ -104,7 +104,7 @@ public class UserService {
     public User addUser(User user) {
         modificate(user);
 
-        storage.updateUserInStorage(user);
+        storage.update(user);
 
         log.debug("Пользователь добавлен " + user);
 
@@ -117,7 +117,7 @@ public class UserService {
 
         modificate(user);
 
-        storage.updateUserInStorage(user);
+        storage.update(user);
 
         log.debug("Пользователь обновлён " + user);
 
@@ -126,7 +126,7 @@ public class UserService {
 
     public List<User> getUsers() {
 
-        List<User> users = storage.getUserFromStorage();
+        List<User> users = storage.getAll();
         log.info("Кол-во пользователей {}", users.size());
 
         return users;
