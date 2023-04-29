@@ -14,11 +14,11 @@ import java.util.List;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final FilmSevice sevice;
+    private final FilmSevice service;
 
     @Autowired
-    public FilmController(FilmSevice sevice) {
-        this.sevice = sevice;
+    public FilmController(FilmSevice service) {
+        this.service = service;
     }
 
 
@@ -26,7 +26,7 @@ public class FilmController {
     public Film addFilm(@Valid @RequestBody Film film) {
         log.debug("Начало добавление фильма с параметрами {}", film);
 
-        return sevice.addFilmInStorage(film);
+        return service.addFilmInStorage(film);
     }
 
 
@@ -34,41 +34,41 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.debug("Начало обновление фильма с параметрами {}", film);
 
-        return sevice.updateFilmInStorage(film);
+        return service.updateFilmInStorage(film);
     }
 
     @GetMapping
     public List<Film> getFilms() {
         log.debug("Начало запроса всех фильмов");
 
-        return sevice.getFilmFromStorage();
+        return service.getFilmFromStorage();
     }
 
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable long id) {
         log.debug("Начало запроса фильма по id= {}", id);
 
-        return sevice.getFilm(id);
+        return service.getFilm(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable long id, @PathVariable long userId) {
         log.debug("Начало добавления Like для фильма id = {} пользователем id = {}", id, userId);
 
-        sevice.addLike(id, userId);
+        service.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable long id, @PathVariable long userId) {
         log.debug("Начало удаления Like для фильма id = {} пользователем id = {}", id, userId);
 
-        sevice.deleteLike(id, userId);
+        service.deleteLike(id, userId);
     }
 
     @GetMapping("/popular")
     public List<Film> getPopular(@RequestParam(defaultValue = "10") String count) {
         log.debug("Начало запроса {} самых популярых фильмов", count);
 
-        return sevice.getPopular(Integer.parseInt(count));
+        return service.getPopular(Integer.parseInt(count));
     }
 }

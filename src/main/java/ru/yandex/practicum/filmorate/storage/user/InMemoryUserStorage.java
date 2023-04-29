@@ -22,7 +22,6 @@ public class InMemoryUserStorage implements UserStorage {
         user.setId(++counter);
 
         users.put(user.getId(), user);
-        
     }
 
     @Override
