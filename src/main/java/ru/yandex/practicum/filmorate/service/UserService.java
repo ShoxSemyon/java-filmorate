@@ -3,12 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.UserComparatorById;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 
@@ -16,7 +18,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserStorage storage;
-    private long counter = 0;
 
     @Autowired
     public UserService(UserStorage storage) {
@@ -24,20 +25,17 @@ public class UserService {
     }
 
     public void addFriend(long id, long friendId) {
-        User user = getUser(id);
-        User friend = getUser(friendId);
+        User user = storage.getUser(id);
+        User friend = storage.getUser(friendId);
 
 
         user.setFriend(friendId);
         friend.setFriend(id);
-
-        System.out.println(user);
-        System.out.println(friend);
     }
 
     public void deleteFriend(long id, long friendId) {
-        User user = getUser(id);
-        User friend = getUser(friendId);
+        User user = storage.getUser(id);
+        User friend = storage.getUser(friendId);
 
         user.deleteFriend(friendId);
         friend.deleteFriend(id);
@@ -46,7 +44,7 @@ public class UserService {
 
     public List<User> getFriends(long id) {
         List<User> friendList = new ArrayList<>();
-        User user = getUser(id);
+        User user = storage.getUser(id);
         if (!user.getMyFriend().isEmpty()) {
             friendList = getFriendList(user.getMyFriend());
         }
@@ -54,36 +52,20 @@ public class UserService {
         return friendList;
     }
 
-    public List<User> getCommonsFriends(long id, long friendId) {
-        List<User> commonFriendList = new ArrayList<>();
-        Set<Long> userFriendList = new HashSet<>(getUser(id).getMyFriend());
-        Set<Long> friendList = new HashSet<>(getUser(friendId).getMyFriend());
+    public List<User> getCommonFriends(long id, long otherId) {
+        final User user = storage.getUser(id);
+        final User other = storage.getUser(otherId);
+        final Set<Long> friends = user.getMyFriend();
+        final Set<Long> otherFriends = other.getMyFriend();
 
-        if (userFriendList.isEmpty() || friendList.isEmpty()) {
-            return commonFriendList;
-        }
-
-        userFriendList.retainAll(friendList);
-        if (userFriendList.isEmpty()) {
-            return commonFriendList;
-        }
-
-        return getFriendList(userFriendList);
+        return friends.stream()
+                .filter(otherFriends::contains)
+                .map(storage::getUser)
+                .collect(Collectors.toList());
     }
 
     public User getUser(long id) {
-        Optional<User> us = storage.getAll()
-                .stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
-
-        if (us.isPresent()) {
-
-            return us.get();
-        } else {
-
-            throw new NotFoundException(String.format("Ползователь c Id = %s не найден", id));
-        }
+        return storage.getUser(id);
 
     }
 
@@ -113,7 +95,7 @@ public class UserService {
 
     public User updateUser(User user) {
 
-        getUser(user.getId());
+        storage.getUser(user.getId());
 
         modificate(user);
 
@@ -133,7 +115,6 @@ public class UserService {
     }
 
     private void modificate(User user) {
-        if (user.getId() == 0) user.setId(++counter);
         if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
         if (user.getMyFriend() == null) user.setMyFriend(new TreeSet<>());
     }
