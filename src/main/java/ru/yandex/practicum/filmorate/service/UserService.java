@@ -86,7 +86,7 @@ public class UserService {
     public User addUser(User user) {
         modificate(user);
 
-        storage.update(user);
+        storage.add(user);
 
         log.debug("Пользователь добавлен " + user);
 
