@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -34,7 +35,7 @@ class UserControllerTest {
     }
 
     @Test
-    void test1_addFilmWithInvalidEmail() throws Exception {
+    void test2_addFilmWithInvalidEmail() throws Exception {
         String content = "{\n" +
                 "  \"login\": \"dolore ullamco\",\n" +
                 "  \"name\": \"\",\n" +
@@ -49,7 +50,7 @@ class UserControllerTest {
     }
 
     @Test
-    void test1_addFilmWithInvalidBirthday() throws Exception {
+    void test3_addFilmWithInvalidBirthday() throws Exception {
         String content = "{\n" +
                 "  \"login\": \"dolore ullamco\",\n" +
                 "  \"name\": \"\",\n" +
@@ -61,6 +62,13 @@ class UserControllerTest {
                         .header("Content-Type", "application/json")
                         .content(content))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void test4_addFriendWitNotExistUser() throws Exception {
+
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(status().isNotFound());
     }
 
 }

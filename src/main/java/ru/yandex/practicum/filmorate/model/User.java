@@ -4,6 +4,8 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
+
 
 @Getter
 @Setter
@@ -27,4 +29,17 @@ public class User {
 
     @PastOrPresent
     private LocalDate birthday;
+
+    private Set<Long> myFriend;
+
+    public boolean setFriend(Long id) {
+
+        return myFriend.add(id);
+    }
+
+    public boolean deleteFriend(long id) {
+
+        return myFriend.remove(id);
+
+    }
 }
