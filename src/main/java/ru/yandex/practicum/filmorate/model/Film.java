@@ -31,6 +31,12 @@ public class Film {
 
     private Set<Long> userLikeIds;
 
+    @NotNull
+    private Set<Genre> genre;
+
+    @NotNull
+    private Rating rating;
+
     public boolean setLike(Long id) {
 
         return userLikeIds.add(id);

@@ -8,9 +8,9 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.UserComparatorById;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 
@@ -46,7 +46,7 @@ public class UserService {
         List<User> friendList = new ArrayList<>();
         User user = storage.getUser(id);
         if (!user.getMyFriend().isEmpty()) {
-            friendList = getFriendList(user.getMyFriend());
+            friendList = getFriendList(user.getMyFriend().keySet());
         }
 
         return friendList;
@@ -55,8 +55,8 @@ public class UserService {
     public List<User> getCommonFriends(long id, long otherId) {
         final User user = storage.getUser(id);
         final User other = storage.getUser(otherId);
-        final Set<Long> friends = user.getMyFriend();
-        final Set<Long> otherFriends = other.getMyFriend();
+        final Set<Long> friends = user.getMyFriend().keySet();
+        final Set<Long> otherFriends = other.getMyFriend().keySet();
 
         return friends.stream()
                 .filter(otherFriends::contains)
@@ -116,6 +116,6 @@ public class UserService {
 
     private void modificate(User user) {
         if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
-        if (user.getMyFriend() == null) user.setMyFriend(new TreeSet<>());
+        if (user.getMyFriend() == null) user.setMyFriend(new HashMap<>());
     }
 }
