@@ -29,16 +29,14 @@ public class UserService {
         User friend = storage.getUser(friendId);
 
 
-        user.setFriend(friendId);
-        friend.setFriend(id);
+        storage.addFriendSiquence(id, friendId);
     }
 
     public void deleteFriend(long id, long friendId) {
         User user = storage.getUser(id);
         User friend = storage.getUser(friendId);
 
-        user.deleteFriend(friendId);
-        friend.deleteFriend(id);
+        storage.deleteFriendSiquence(id, friendId);
 
     }
 

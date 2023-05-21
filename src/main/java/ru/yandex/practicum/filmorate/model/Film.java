@@ -32,7 +32,7 @@ public class Film {
     private Set<Long> userLikeIds;
 
     @NotNull
-    private Set<Genre> genre;
+    private Set<Genre> mpa;
 
     @NotNull
     private Rating rating;

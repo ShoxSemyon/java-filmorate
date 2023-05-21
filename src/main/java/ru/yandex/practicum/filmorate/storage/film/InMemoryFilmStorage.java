@@ -47,4 +47,15 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     }
 
+    @Override
+    public void addLikeSiquence(long id, long userId) {
+        films.get(id).setLike(userId);
+    }
+
+    @Override
+    public void deleteLikeSiquence(long id, long userId) {
+        films.get(id).deleteLike(userId);
+
+    }
+
 }

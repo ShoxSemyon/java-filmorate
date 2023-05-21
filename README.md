@@ -2,5 +2,5 @@
 
 Template repository for Filmorate project.
 
-![Schema DB](/schemdb.png)
+![Schema DB](/filmorate.png)
 

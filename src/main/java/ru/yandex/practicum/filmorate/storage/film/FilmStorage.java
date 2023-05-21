@@ -12,4 +12,9 @@ public interface FilmStorage {
     List<Film> getAll();
 
     Film getFilm(long id);
+
+    void addLikeSiquence(long id, long userId);
+
+    void deleteLikeSiquence(long id, long userId);
+
 }

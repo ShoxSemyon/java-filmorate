@@ -32,8 +32,8 @@ public class User {
 
     private Map<Long, FriendshipStatus> myFriend;
 
-    public void setFriend(Long id) {
-        myFriend.put(id, FriendshipStatus.UNCONFIRMED);
+    public void setFriend(Long id, FriendshipStatus friendshipStatus) {
+        myFriend.put(id, friendshipStatus);
     }
 
     public void deleteFriend(long id) {

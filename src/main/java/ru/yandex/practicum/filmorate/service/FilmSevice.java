@@ -65,9 +65,9 @@ public class FilmSevice {
 
     public void addLike(long id, long userId) {
         Film film = storage.getFilm(id);
-        User user = uService.getUser(userId);
+        uService.getUser(userId);
 
-        film.setLike(userId);
+        storage.addLikeSiquence(id, userId);
 
     }
 
@@ -75,7 +75,7 @@ public class FilmSevice {
         Film film = storage.getFilm(id);
         User user = uService.getUser(userId);
 
-        film.deleteLike(userId);
+        storage.deleteLikeSiquence(id, userId);
     }
 
     public List<Film> getPopular(int count) {
