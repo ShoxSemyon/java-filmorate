@@ -5,13 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.utils.FilmComparatorByLikeCount;
+import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -92,6 +96,13 @@ public class FilmSevice {
 
     protected boolean validate(Film film) {
         if (film.getUserLikeIds() == null) film.setUserLikeIds(new HashSet<>());
+
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            Set<Genre> set = new TreeSet<>(new GenresComparator());
+            set.addAll(film.getGenres());
+            film.setGenres(set);
+        }
+
 
         return film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28))
                 && film.getDuration().toMinutes() > 0;

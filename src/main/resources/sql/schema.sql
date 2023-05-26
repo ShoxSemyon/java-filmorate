@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "Genre"
 (
     "id"      integer auto_increment NOT NULL,
     "film_id" integer                NOT NULL,
-    "genre"   varchar(10)            NOT NULL,
+    "name"    varchar(10)            NOT NULL,
 
     CONSTRAINT "pk_genre" PRIMARY KEY ("id"),
     CONSTRAINT "fk_genre_film_id" FOREIGN KEY ("film_id") REFERENCES "Film" ("id")

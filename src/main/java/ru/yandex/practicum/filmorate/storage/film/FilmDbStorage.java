@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -44,7 +46,7 @@ public class FilmDbStorage implements FilmStorage {
             stm.setString(2, film.getDescription());
             stm.setDate(3, Date.valueOf(film.getReleaseDate()));
             stm.setLong(4, film.getDuration().toMinutes());
-            stm.setString(5, film.getRating().toString());
+            stm.setString(5, film.getMpa().toString());
             return stm;
         }, keyHolder);
 
@@ -52,7 +54,9 @@ public class FilmDbStorage implements FilmStorage {
 
         log.info("В H2 добавлен User c Id = " + film.getId());
 
-        batchUpdateGenres(new ArrayList<>(film.getMpa()), film.getId());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            batchUpdateGenres(new ArrayList<>(film.getGenres()), film.getId());
+        }
     }
 
     @Override
@@ -69,10 +73,13 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 film.getDuration().toMinutes(),
                 Date.valueOf(film.getReleaseDate()),
-                film.getRating().toString());
+                film.getMpa().toString(),
+                film.getId());
 
         batchDeleteGenres(film.getId());
-        batchUpdateGenres(new ArrayList<>(film.getMpa()), film.getId());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            batchUpdateGenres(new ArrayList<>(film.getGenres()), film.getId());
+        }
     }
 
     @Override
@@ -85,7 +92,7 @@ public class FilmDbStorage implements FilmStorage {
 
         films.forEach(film -> {
             film.setUserLikeIds(getLikeSiquence(film.getId()));
-            film.setMpa(getGenre(film.getId()));
+            film.setGenres(getGenre(film.getId()));
         });
         return films;
     }
@@ -96,11 +103,16 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM \"Film\"\n" +
                 "WHERE \"id\" = ?";
 
-        Film film = jdbcTemplate.queryForObject(sql,
-                (resultSet, rowNum) -> extractedFilm(resultSet),
-                id);
+        Film film = null;
+        try {
+            film = jdbcTemplate.queryForObject(sql,
+                    (resultSet, rowNum) -> extractedFilm(resultSet),
+                    id);
+        } catch (DataAccessException e) {
+            throw new NotFoundException(e.getMessage());
+        }
         film.setUserLikeIds(getLikeSiquence(film.getId()));
-        film.setMpa(getGenre(film.getId()));
+        film.setGenres(getGenre(film.getId()));
         return film;
     }
 
@@ -121,7 +133,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void batchUpdateGenres(List<Genre> genres, long filmId) {
-        String sql = "INSERT INTO \"Genre\"(\"film_id\", \"genre\")\n" +
+        String sql = "INSERT INTO \"Genre\"(\"film_id\", \"name\")\n" +
                 "VALUES (?,?)";
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -147,12 +159,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Set<Genre> getGenre(long id) {
-        String sql = "SELECT \"genre\"\n" +
+        String sql = "SELECT \"name\"\n" +
                 "FROM \"Genre\"\n" +
                 "WHERE \"film_id\"=?";
 
         List<Genre> filmGenre = jdbcTemplate.query(sql,
-                (rs, rowNum) -> Genre.valueOf(rs.getString("genre")),
+                (rs, rowNum) -> Genre.valueOf(rs.getString("name")),
                 id);
 
         return new TreeSet<>(filmGenre);
@@ -177,7 +189,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setDescription(resultSet.getString("description"));
         film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
         film.setDuration(Duration.ofMinutes(resultSet.getLong("duration")));
-        film.setRating(Rating.valueOf(resultSet.getString("rating")));
+        film.setMpa(Rating.valueOf(resultSet.getString("rating")));
         return film;
     }
 }

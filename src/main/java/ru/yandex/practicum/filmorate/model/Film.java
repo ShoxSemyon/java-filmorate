@@ -31,11 +31,11 @@ public class Film {
 
     private Set<Long> userLikeIds;
 
-    @NotNull
-    private Set<Genre> mpa;
+
+    private Set<Genre> genres;
 
     @NotNull
-    private Rating rating;
+    private Rating mpa;
 
     public boolean setLike(Long id) {
 
