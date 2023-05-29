@@ -1,3 +1,18 @@
+CREATE TABLE IF NOT EXISTS "Genre"
+(
+    "id"   integer      NOT NULL,
+    "name" varchar(255) NOT NULL,
+    CONSTRAINT "pk_genre" PRIMARY KEY ("id")
+
+);
+CREATE TABLE IF NOT EXISTS "Rating"
+(
+    "id"   integer      NOT NULL,
+    "name" varchar(255) NOT NULL,
+    CONSTRAINT "pk_rating" PRIMARY KEY ("id")
+
+);
+
 CREATE TABLE IF NOT EXISTS "Film"
 (
     "id"           integer auto_increment NOT NULL,
@@ -6,25 +21,22 @@ CREATE TABLE IF NOT EXISTS "Film"
     "release_date" date                   NOT NULL,
     "duration"     integer                NOT NULL,
     "rating"       integer                NOT NULL,
-    CONSTRAINT "pk_film" PRIMARY KEY ("id")
+    CONSTRAINT "pk_film" PRIMARY KEY ("id"),
+    CONSTRAINT "fk_film_rating_id" FOREIGN KEY ("rating") REFERENCES "Rating" ("id")
 );
 
-CREATE TABLE IF NOT EXISTS "Genre"
+CREATE TABLE IF NOT EXISTS "Film_genre"
 (
-    "id"      integer auto_increment NOT NULL,
-    "film_id" integer                NOT NULL,
-    "name"    varchar(10)            NOT NULL,
+    "id"       integer auto_increment NOT NULL,
+    "film_id"  integer                NOT NULL,
+    "genre_id" integer                NOT NULL,
 
-    CONSTRAINT "pk_genre" PRIMARY KEY ("id"),
-    CONSTRAINT "fk_genre_film_id" FOREIGN KEY ("film_id") REFERENCES "Film" ("id")
-);
-
-CREATE TABLE IF NOT EXISTS "Rating"
-(
-    "id"   integer      NOT NULL,
-    "name" varchar(255) NOT NULL
+    CONSTRAINT "pk_film_genre" PRIMARY KEY ("id"),
+    CONSTRAINT "fk_film_genre_film" FOREIGN KEY ("film_id") REFERENCES "Film" ("id"),
+    CONSTRAINT "fk_film_genre_genre" FOREIGN KEY ("genre_id") REFERENCES "Genre" ("id")
 
 );
+
 
 CREATE TABLE IF NOT EXISTS "User"
 (

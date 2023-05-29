@@ -11,7 +11,9 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
+import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -30,9 +32,12 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final RatingStorage ratingStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, RatingStorage ratingStorage) {
+    private final GenreStorage genreStorage;
+
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, RatingStorage ratingStorage, GenreStorage genreStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.ratingStorage = ratingStorage;
+        this.genreStorage = genreStorage;
     }
 
     @Override
@@ -135,13 +140,13 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void batchUpdateGenres(List<Genre> genres, long filmId) {
-        String sql = "INSERT INTO \"Genre\"(\"film_id\", \"name\")\n" +
+        String sql = "INSERT INTO \"Film_genre\"(\"film_id\", \"genre_id\")\n" +
                 "VALUES (?,?)";
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, filmId);
-                ps.setString(2, genres.get(i).toString());
+                ps.setLong(2, genres.get(i).getId());
             }
 
             @Override
@@ -154,22 +159,24 @@ public class FilmDbStorage implements FilmStorage {
 
     private void batchDeleteGenres(long filmId) {
         String sql = "DELETE\n" +
-                "FROM \"Genre\"\n" +
+                "FROM \"Film_genre\"\n" +
                 "WHERE \"film_id\" = ?";
         jdbcTemplate.update(sql, filmId);
         log.info("Жанры удалены для фильтма с id=" + filmId);
     }
 
     private Set<Genre> getGenre(long id) {
-        String sql = "SELECT \"name\"\n" +
-                "FROM \"Genre\"\n" +
+        String sql = "SELECT \"genre_id\"\n" +
+                "FROM \"Film_genre\"\n" +
                 "WHERE \"film_id\"=?";
 
-        List<Genre> filmGenre = jdbcTemplate.query(sql,
-                (rs, rowNum) -> Genre.valueOf(rs.getString("name")),
-                id);
+        Set<Genre> filmGenre = new TreeSet<>(new GenresComparator());
+        filmGenre.addAll(jdbcTemplate.query(sql,
+                (rs, rowNum) -> genreStorage.getGenre(rs.getLong("genre_id")),
+                id)
+        );
 
-        return new TreeSet<>(filmGenre);
+        return filmGenre;
     }
 
     private Set<Long> getLikeSiquence(long id) {
