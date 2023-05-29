@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -28,9 +28,11 @@ import java.util.TreeSet;
 @Primary
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final RatingStorage ratingStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, RatingStorage ratingStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.ratingStorage = ratingStorage;
     }
 
     @Override
@@ -46,7 +48,7 @@ public class FilmDbStorage implements FilmStorage {
             stm.setString(2, film.getDescription());
             stm.setDate(3, Date.valueOf(film.getReleaseDate()));
             stm.setLong(4, film.getDuration().toMinutes());
-            stm.setString(5, film.getMpa().toString());
+            stm.setInt(5, ((int) film.getMpa().getId()));
             return stm;
         }, keyHolder);
 
@@ -73,7 +75,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(),
                 film.getDuration().toMinutes(),
                 Date.valueOf(film.getReleaseDate()),
-                film.getMpa().toString(),
+                film.getMpa().getId(),
                 film.getId());
 
         batchDeleteGenres(film.getId());
@@ -189,7 +191,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setDescription(resultSet.getString("description"));
         film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
         film.setDuration(Duration.ofMinutes(resultSet.getLong("duration")));
-        film.setMpa(Rating.valueOf(resultSet.getString("rating")));
+        film.setMpa(ratingStorage.getRating(resultSet.getLong("rating")));
         return film;
     }
 }

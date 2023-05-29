@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS "Film"
 (
     "id"           integer auto_increment NOT NULL,
-    "name"         varchar(100)           NOT NULL,
-    "description"  varchar(200),
+    "name"         varchar(255)           NOT NULL,
+    "description"  varchar(255),
     "release_date" date                   NOT NULL,
     "duration"     integer                NOT NULL,
-    "rating"       varchar(10)            NOT NULL,
+    "rating"       integer                NOT NULL,
     CONSTRAINT "pk_film" PRIMARY KEY ("id")
 );
 
@@ -19,17 +19,24 @@ CREATE TABLE IF NOT EXISTS "Genre"
     CONSTRAINT "fk_genre_film_id" FOREIGN KEY ("film_id") REFERENCES "Film" ("id")
 );
 
+CREATE TABLE IF NOT EXISTS "Rating"
+(
+    "id"   integer      NOT NULL,
+    "name" varchar(255) NOT NULL
+
+);
+
 CREATE TABLE IF NOT EXISTS "User"
 (
     "id"         integer auto_increment NOT NULL,
-    "email"      varchar(50)            NOT NULL,
-    "login"      varchar(200)           NOT NULL,
-    "name"       varchar(100)           NOT NULL,
+    "email"      varchar(255)           NOT NULL,
+    "login"      varchar(255)           NOT NULL,
+    "name"       varchar(255)           NOT NULL,
     "local_date" date                   NOT NULL,
     CONSTRAINT "pk_user" PRIMARY KEY ("id")
 );
 
-create table "Friendship"
+CREATE TABLE IF NOT EXISTS "Friendship"
 (
     "user_id"   INTEGER               not null,
     "friend_id" INTEGER               not null,
