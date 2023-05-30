@@ -79,7 +79,7 @@ public class FilmSevice {
         Film film = storage.getFilm(id);
         User user = uService.getUser(userId);
 
-        storage.deleteLikeSiquence(id, userId);
+        storage.deleteFilmLike(id, userId);
     }
 
     public List<Film> getPopular(int count) {

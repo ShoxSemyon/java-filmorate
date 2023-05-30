@@ -53,7 +53,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteLikeSiquence(long id, long userId) {
+    public void deleteFilmLike(long id, long userId) {
         films.get(id).deleteLike(userId);
 
     }
