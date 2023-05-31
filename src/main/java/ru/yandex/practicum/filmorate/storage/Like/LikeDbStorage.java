@@ -41,16 +41,14 @@ public class LikeDbStorage implements LikeStorage {
     public void deleteFilmLike(long id, long userId) {
         String sql = "DELETE\n" + "FROM \"User_like\"\n" + "WHERE \"film_id\" = ?\n" + "  AND \"user_id\" = ?";
 
-        int RowCount = jdbcTemplate.update(sql, id, userId);
-        if (RowCount == 0) throw new NotFoundException("Фильм или пользователь не найден");
+        int rowCount = jdbcTemplate.update(sql, id, userId);
+        if (rowCount == 0) throw new NotFoundException("Фильм или пользователь не найден");
 
     }
 
     @Override
     public void loadLike(List<Film> films) {
-        films.forEach(film -> {
-            film.setUserLikeIds(new TreeSet<>());
-        });
+        films.forEach(film -> film.setUserLikeIds(new TreeSet<>()));
 
         if (films.size() < 1) return;
 
