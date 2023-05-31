@@ -52,7 +52,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public void loadFilm(List<Film> films) {
+    public void loadGenres(List<Film> films) {
         String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
         final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
         final String sqlQuery = "select g.\"id\",\n" +

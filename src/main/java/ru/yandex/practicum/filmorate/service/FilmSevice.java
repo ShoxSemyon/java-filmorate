@@ -69,7 +69,7 @@ public class FilmSevice {
     public List<Film> getFilmFromStorage() {
         List<Film> films = storage.getAll();
         if (films.size() > 0)
-            genreStorage.loadFilm(films);
+            genreStorage.loadGenres(films);
         log.info("Кол-во фильмов {}", films.size());
         return films;
     }
