@@ -6,11 +6,19 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static java.util.function.UnaryOperator.identity;
 
 @Repository
 @Primary
@@ -22,13 +30,20 @@ public class GenreDbStorage implements GenreStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    private static Genre extraxctGenre(ResultSet rs) throws SQLException {
+        Genre genre = new Genre();
+        genre.setId(rs.getLong("id"));
+        genre.setName(rs.getString("name"));
+        return genre;
+    }
+
     @Override
     public Genre getGenre(long id) {
         String sql = "SELECT * FROM \"Genre\" WHERE \"id\" = ?";
 
         Genre genre;
         try {
-            genre = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> extraxctRating(rs), id);
+            genre = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> extraxctGenre(rs), id);
         } catch (DataAccessException e) {
             throw new NotFoundException("Genre не найден");
         }
@@ -36,18 +51,30 @@ public class GenreDbStorage implements GenreStorage {
         return genre;
     }
 
+    @Override
+    public void loadFilm(List<Film> films) {
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
+        final String sqlQuery = "select g.\"id\",\n" +
+                "       g.\"name\",\n" +
+                "       fg.\"film_id\",\n" +
+                "       fg.\"genre_id\"\n" +
+                "from \"Genre\" g, \"Film_genre\" fg where fg.\"genre_id\" = g.\"id\" AND fg.\"film_id\" " +
+                "in (" + inSql + ")";
+
+
+        jdbcTemplate.query(sqlQuery, (rs, rowNum) -> {
+            final Film film = filmById.get(rs.getLong("film_id"));
+            if (film.getGenres() == null) film.setGenres(new TreeSet<>(new GenresComparator()));
+            film.setGenre(extraxctGenre(rs));
+            return film;
+        }, films.stream().map(Film::getId).toArray());
+    }
 
     @Override
     public List<Genre> getAllGenre() {
         String sql = "SELECT * FROM \"Genre\"";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> extraxctRating(rs));
-    }
-
-    private Genre extraxctRating(ResultSet rs) throws SQLException {
-        Genre genre = new Genre();
-        genre.setId(rs.getLong("id"));
-        genre.setName(rs.getString("name"));
-        return genre;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> extraxctGenre(rs));
     }
 }

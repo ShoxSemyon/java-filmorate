@@ -88,7 +88,7 @@ public class FilmDbStorage implements FilmStorage {
         });
 
         setUserLike(films);
-        setGenres(films);
+        //setGenres(films);
         return films;
     }
 
@@ -153,13 +153,20 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void addLikeSiquence(long id, long userId) {
         String sql = "INSERT INTO \"User_like\"(\"film_id\", \"user_id\")\n" + "values (?, ?)";
-        jdbcTemplate.update(sql, id, userId);
+        try {
+            jdbcTemplate.update(sql, id, userId);
+        } catch (DataAccessException e) {
+            throw new NotFoundException(e.getMessage());
+        }
     }
 
     @Override
     public void deleteFilmLike(long id, long userId) {
         String sql = "DELETE\n" + "FROM \"User_like\"\n" + "WHERE \"film_id\" = ?\n" + "  AND \"user_id\" = ?";
-        jdbcTemplate.update(sql, id, userId);
+
+        int RowCount = jdbcTemplate.update(sql, id, userId);
+        if (RowCount == 0) throw new NotFoundException("Фильм или пользователь не найден");
+
     }
 
     private void batchUpdateGenres(List<Genre> genres, long filmId) {

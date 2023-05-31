@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.utils.FilmComparatorByLikeCount;
 import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
@@ -23,13 +24,17 @@ import java.util.stream.Collectors;
 public class FilmSevice {
 
     private final FilmStorage storage;
+    private final RatingStorage ratingStorage;
+    private final GenreStorage genreStorage;
 
     private final UserService uService;
 
 
     @Autowired
-    public FilmSevice(FilmStorage storage, UserService uService) {
+    public FilmSevice(FilmStorage storage, RatingStorage ratingStorage, GenreStorage genreStorage, UserService uService) {
         this.storage = storage;
+        this.ratingStorage = ratingStorage;
+        this.genreStorage = genreStorage;
         this.uService = uService;
     }
 
@@ -63,21 +68,19 @@ public class FilmSevice {
 
     public List<Film> getFilmFromStorage() {
         List<Film> films = storage.getAll();
+        if (films.size() > 0)
+            genreStorage.loadFilm(films);
         log.info("Кол-во фильмов {}", films.size());
         return films;
     }
 
     public void addLike(long id, long userId) {
-        Film film = storage.getFilm(id);
-        uService.getUser(userId);
 
         storage.addLikeSiquence(id, userId);
 
     }
 
     public void deleteLike(long id, long userId) {
-        Film film = storage.getFilm(id);
-        User user = uService.getUser(userId);
 
         storage.deleteFilmLike(id, userId);
     }

@@ -23,6 +23,13 @@ public class RatingDbStorage implements RatingStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    private static Rating extraxctRating(ResultSet rs) throws SQLException {
+        Rating rating1 = new Rating();
+        rating1.setId(rs.getLong("id"));
+        rating1.setName(rs.getString("name"));
+        return rating1;
+    }
+
     @Override
     public Rating getRating(long id) {
         String sql = "SELECT * FROM \"Rating\" WHERE \"id\" = ?";
@@ -37,18 +44,10 @@ public class RatingDbStorage implements RatingStorage {
         return rating;
     }
 
-
     @Override
     public List<Rating> getAllRating() {
         String sql = "SELECT * FROM \"Rating\"";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> extraxctRating(rs));
-    }
-
-    private Rating extraxctRating(ResultSet rs) throws SQLException {
-        Rating rating1 = new Rating();
-        rating1.setId(rs.getLong("id"));
-        rating1.setName(rs.getString("name"));
-        return rating1;
     }
 }
