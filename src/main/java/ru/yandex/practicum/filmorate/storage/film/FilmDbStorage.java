@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.rating.RatingDbStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
@@ -78,7 +79,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAll() {
-        String sql = "SELECT *\n" + "FROM \"Film\"";
+        String sql = "SELECT F.*, R.\"name\" AS \"rating_name\", R.\"id\" AS \"rating_id\"\n" +
+                "FROM \"Film\" F\n" +
+                "         JOIN \"Rating\" R ON F.\"rating\" = R.\"id\"";
 
         List<Film> films = jdbcTemplate.query(sql, (resultSet, rowNum) -> extractedFilm(resultSet));
 
@@ -88,34 +91,9 @@ public class FilmDbStorage implements FilmStorage {
         });
 
         setUserLike(films);
-        //setGenres(films);
         return films;
     }
 
-    private void setGenres(List<Film> films) {
-        String sql = "SELECT *\n" + "FROM \"Film_genre\"\n";
-
-        List<Genre> genres = genreStorage.getAllGenre();
-
-        jdbcTemplate.query(sql, (resultSet, rowNum) -> {
-            films.forEach(film -> {
-                try {
-                    if (film.getId() == resultSet.getLong("film_id")) {
-                        genres.forEach(genre -> {
-                            try {
-                                if (genre.getId() == resultSet.getLong("genre_id")) film.setGenre(genre);
-                            } catch (SQLException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            return null;
-        });
-    }
 
     private void setUserLike(List<Film> films) {
         String sql = "SELECT *\n" + "FROM \"User_like\"\n";
@@ -137,9 +115,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(long id) {
-        String sql = "SELECT *\n" + "FROM \"Film\"\n" + "WHERE \"id\" = ?";
+        String sql = "SELECT F.*, R.\"name\" AS \"rating_name\", R.\"id\" AS \"rating_id\"\n" +
+                "FROM \"Film\" F\n" +
+                "         JOIN \"Rating\" R ON F.\"rating\" = R.\"id\"\n" +
+                "WHERE F.\"id\"=?";
 
-        Film film = null;
+        Film film;
         try {
             film = jdbcTemplate.queryForObject(sql, (resultSet, rowNum) -> extractedFilm(resultSet), id);
         } catch (DataAccessException e) {
@@ -216,7 +197,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setDescription(resultSet.getString("description"));
         film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
         film.setDuration(Duration.ofMinutes(resultSet.getLong("duration")));
-        film.setMpa(ratingStorage.getRating(resultSet.getLong("rating")));
+        film.setMpa(RatingDbStorage.extraxctRating(resultSet));
         return film;
     }
 }

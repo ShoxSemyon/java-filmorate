@@ -10,4 +10,5 @@ public interface RatingStorage {
 
     List<Rating> getAllRating();
 
+
 }

@@ -23,16 +23,16 @@ public class RatingDbStorage implements RatingStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static Rating extraxctRating(ResultSet rs) throws SQLException {
+    public static Rating extraxctRating(ResultSet rs) throws SQLException {
         Rating rating1 = new Rating();
-        rating1.setId(rs.getLong("id"));
-        rating1.setName(rs.getString("name"));
+        rating1.setId(rs.getLong("rating_id"));
+        rating1.setName(rs.getString("rating_name"));
         return rating1;
     }
 
     @Override
     public Rating getRating(long id) {
-        String sql = "SELECT * FROM \"Rating\" WHERE \"id\" = ?";
+        String sql = "SELECT \"name\" AS \"rating_name\", \"id\" AS \"rating_id\" FROM \"Rating\" WHERE \"id\" = ?";
 
         Rating rating;
         try {
@@ -46,7 +46,7 @@ public class RatingDbStorage implements RatingStorage {
 
     @Override
     public List<Rating> getAllRating() {
-        String sql = "SELECT * FROM \"Rating\"";
+        String sql = "SELECT \"name\" AS \"rating_name\", \"id\" AS \"rating_id\" FROM \"Rating\"";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> extraxctRating(rs));
     }
