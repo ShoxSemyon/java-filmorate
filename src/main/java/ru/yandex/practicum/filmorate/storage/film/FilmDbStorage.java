@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingDbStorage;
-import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
 import java.sql.Date;
@@ -31,12 +30,10 @@ import java.util.TreeSet;
 @Primary
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final RatingStorage ratingStorage;
     private final GenreStorage genreStorage;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, RatingStorage ratingStorage, GenreStorage genreStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreStorage genreStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.ratingStorage = ratingStorage;
         this.genreStorage = genreStorage;
     }
 
@@ -89,8 +86,6 @@ public class FilmDbStorage implements FilmStorage {
             film.setUserLikeIds(new TreeSet<>());
             film.setGenres(new TreeSet<>(new GenresComparator()));
         });
-
-        setUserLike(films);
         return films;
     }
 

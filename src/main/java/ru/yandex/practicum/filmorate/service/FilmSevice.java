@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.Like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
@@ -26,15 +27,16 @@ public class FilmSevice {
     private final FilmStorage storage;
     private final RatingStorage ratingStorage;
     private final GenreStorage genreStorage;
-
+    private final LikeStorage likeStorage;
     private final UserService uService;
 
 
     @Autowired
-    public FilmSevice(FilmStorage storage, RatingStorage ratingStorage, GenreStorage genreStorage, UserService uService) {
+    public FilmSevice(FilmStorage storage, RatingStorage ratingStorage, GenreStorage genreStorage, LikeStorage likeStorage, UserService uService) {
         this.storage = storage;
         this.ratingStorage = ratingStorage;
         this.genreStorage = genreStorage;
+        this.likeStorage = likeStorage;
         this.uService = uService;
     }
 
@@ -68,26 +70,32 @@ public class FilmSevice {
 
     public List<Film> getFilmFromStorage() {
         List<Film> films = storage.getAll();
-        if (films.size() > 0)
+        if (films.size() > 0) {
             genreStorage.loadGenres(films);
+            likeStorage.loadLike(films);
+        }
         log.info("Кол-во фильмов {}", films.size());
         return films;
     }
 
     public void addLike(long id, long userId) {
 
-        storage.addLikeSiquence(id, userId);
+        likeStorage.addLikeSiquence(id, userId);
 
     }
 
     public void deleteLike(long id, long userId) {
 
-        storage.deleteFilmLike(id, userId);
+        likeStorage.deleteFilmLike(id, userId);
     }
 
     public List<Film> getPopular(int count) {
-        return storage.getAll()
-                .stream()
+        List<Film> films = storage.getAll();
+        if (films.size() > 0) {
+            genreStorage.loadGenres(films);
+            likeStorage.loadLike(films);
+        }
+        return films.stream()
                 .sorted(new FilmComparatorByLikeCount())
                 .limit(count)
                 .collect(Collectors.toList());
