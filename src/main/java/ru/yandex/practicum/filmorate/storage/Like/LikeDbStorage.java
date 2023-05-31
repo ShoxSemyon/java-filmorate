@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static java.util.function.UnaryOperator.identity;
@@ -47,6 +48,12 @@ public class LikeDbStorage implements LikeStorage {
 
     @Override
     public void loadLike(List<Film> films) {
+        films.forEach(film -> {
+            film.setUserLikeIds(new TreeSet<>());
+        });
+
+        if (films.size() < 1) return;
+
         String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
         final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
         final String sqlQuery = "SELECT * FROM \"User_like\" WHERE \"film_id\" in (" + inSql + ")";

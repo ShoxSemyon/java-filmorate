@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.genre;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -10,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -22,6 +25,7 @@ import static java.util.function.UnaryOperator.identity;
 
 @Repository
 @Primary
+@Slf4j
 public class GenreDbStorage implements GenreStorage {
     private JdbcTemplate jdbcTemplate;
 
@@ -53,6 +57,12 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public void loadGenres(List<Film> films) {
+        films.forEach(film -> {
+            film.setGenres(new TreeSet<>(new GenresComparator()));
+        });
+
+        if (films.size() < 1) return;
+
         String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
         final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
         final String sqlQuery = "select g.\"id\",\n" +
@@ -65,7 +75,6 @@ public class GenreDbStorage implements GenreStorage {
 
         jdbcTemplate.query(sqlQuery, (rs, rowNum) -> {
             final Film film = filmById.get(rs.getLong("film_id"));
-            if (film.getGenres() == null) film.setGenres(new TreeSet<>(new GenresComparator()));
             film.setGenre(extraxctGenre(rs));
             return film;
         }, films.stream().map(Film::getId).toArray());
@@ -76,5 +85,30 @@ public class GenreDbStorage implements GenreStorage {
         String sql = "SELECT * FROM \"Genre\"";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> extraxctGenre(rs));
+    }
+
+    @Override
+    public void batchUpdateGenres(List<Genre> genres, long filmId) {
+        String sql = "INSERT INTO \"Film_genre\"(\"film_id\", \"genre_id\")\n" + "VALUES (?,?)";
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, filmId);
+                ps.setLong(2, genres.get(i).getId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return genres.size();
+            }
+        });
+        log.info("Список жанров обнавлён фильма с id=" + filmId);
+    }
+
+    @Override
+    public void batchDeleteGenres(long filmId) {
+        String sql = "DELETE\n" + "FROM \"Film_genre\"\n" + "WHERE \"film_id\" = ?";
+        jdbcTemplate.update(sql, filmId);
+        log.info("Жанры удалены для фильтма с id=" + filmId);
     }
 }

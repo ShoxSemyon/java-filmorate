@@ -9,15 +9,11 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.Like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.utils.FilmComparatorByLikeCount;
 import ru.yandex.practicum.filmorate.utils.GenresComparator;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,19 +21,15 @@ import java.util.stream.Collectors;
 public class FilmSevice {
 
     private final FilmStorage storage;
-    private final RatingStorage ratingStorage;
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
-    private final UserService uService;
 
 
     @Autowired
-    public FilmSevice(FilmStorage storage, RatingStorage ratingStorage, GenreStorage genreStorage, LikeStorage likeStorage, UserService uService) {
+    public FilmSevice(FilmStorage storage, GenreStorage genreStorage, LikeStorage likeStorage) {
         this.storage = storage;
-        this.ratingStorage = ratingStorage;
         this.genreStorage = genreStorage;
         this.likeStorage = likeStorage;
-        this.uService = uService;
     }
 
     public Film addFilmInStorage(Film film) {
@@ -45,6 +37,9 @@ public class FilmSevice {
         if (validate(film)) {
 
             storage.add(film);
+            if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+                genreStorage.batchUpdateGenres(new ArrayList<>(film.getGenres()), film.getId());
+            }
 
             log.debug("Фильм добавлен " + film);
 
@@ -57,11 +52,16 @@ public class FilmSevice {
 
     public Film updateFilmInStorage(Film film) {
 
-        storage.getFilm(film.getId());
+        getFilm(film.getId());
 
         if (!validate(film)) throw new ValidationException("Невалидные параметры" + film);
 
         storage.update(film);
+
+        genreStorage.batchDeleteGenres(film.getId());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            genreStorage.batchUpdateGenres(new ArrayList<>(film.getGenres()), film.getId());
+        }
 
         log.debug("Фильм обновлён " + film);
 
@@ -70,10 +70,10 @@ public class FilmSevice {
 
     public List<Film> getFilmFromStorage() {
         List<Film> films = storage.getAll();
-        if (films.size() > 0) {
-            genreStorage.loadGenres(films);
-            likeStorage.loadLike(films);
-        }
+
+        genreStorage.loadGenres(films);
+        likeStorage.loadLike(films);
+
         log.info("Кол-во фильмов {}", films.size());
         return films;
     }
@@ -91,10 +91,10 @@ public class FilmSevice {
 
     public List<Film> getPopular(int count) {
         List<Film> films = storage.getAll();
-        if (films.size() > 0) {
-            genreStorage.loadGenres(films);
-            likeStorage.loadLike(films);
-        }
+
+        genreStorage.loadGenres(films);
+        likeStorage.loadLike(films);
+
         return films.stream()
                 .sorted(new FilmComparatorByLikeCount())
                 .limit(count)
@@ -102,7 +102,12 @@ public class FilmSevice {
     }
 
     public Film getFilm(long id) {
-        return storage.getFilm(id);
+        Film film = storage.getFilm(id);
+
+        genreStorage.loadGenres(List.of(film));
+        likeStorage.loadLike(List.of(film));
+
+        return film;
     }
 
     protected boolean validate(Film film) {

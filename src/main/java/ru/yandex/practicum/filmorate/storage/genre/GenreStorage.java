@@ -11,4 +11,8 @@ public interface GenreStorage {
     void loadGenres(List<Film> films);
 
     List<Genre> getAllGenre();
+
+    void batchUpdateGenres(List<Genre> genres, long filmId);
+
+    void batchDeleteGenres(long filmId);
 }
