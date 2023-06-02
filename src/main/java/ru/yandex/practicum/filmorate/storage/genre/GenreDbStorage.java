@@ -54,9 +54,7 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public void loadGenres(List<Film> films) {
-        films.forEach(film -> {
-            film.setGenres(new TreeSet<>(new GenresComparator()));
-        });
+        films.forEach(film -> film.setGenres(new TreeSet<>(new GenresComparator())));
 
         if (films.size() < 1) return;
 
@@ -88,10 +86,12 @@ public class GenreDbStorage implements GenreStorage {
     public void saveGenres(Film film) {
         if (film.getGenres() == null) return;
 
-        List<Genre> genres = new ArrayList<>(film.getGenres());
+        String sqlDelete = "DELETE\n" + "FROM \"Film_genre\"\n" + "WHERE \"film_id\" = ?";
+        jdbcTemplate.update(sqlDelete, film.getId());
 
-        String sql = "INSERT INTO \"Film_genre\"(\"film_id\", \"genre_id\")\n" + "VALUES (?,?)";
-        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+        String sqlUpadte = "INSERT INTO \"Film_genre\"(\"film_id\", \"genre_id\")\n" + "VALUES (?,?)";
+        List<Genre> genres = new ArrayList<>(film.getGenres());
+        jdbcTemplate.batchUpdate(sqlUpadte, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, film.getId());
@@ -106,10 +106,4 @@ public class GenreDbStorage implements GenreStorage {
         log.info("Список жанров обнавлён фильма с id=" + film.getId());
     }
 
-    @Override
-    public void batchDeleteGenres(long filmId) {
-        String sql = "DELETE\n" + "FROM \"Film_genre\"\n" + "WHERE \"film_id\" = ?";
-        jdbcTemplate.update(sql, filmId);
-        log.info("Жанры удалены для фильтма с id=" + filmId);
-    }
 }

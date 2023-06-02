@@ -14,5 +14,4 @@ public interface GenreStorage {
 
     void saveGenres(Film film);
 
-    void batchDeleteGenres(long filmId);
 }

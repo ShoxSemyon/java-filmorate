@@ -9,18 +9,16 @@ import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.storage.Like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
-import ru.yandex.practicum.filmorate.utils.FilmComparatorByLikeCount;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FilmSevice {
 
     private static final int MAX_NAME_SIZE = 200;
-    private static final LocaleDate FILM_BIRTHDAY = LocalDate.of();
+    private static final LocalDate FILM_BIRTHDAY = LocalDate.of(1895, 12, 28);
     private final FilmStorage storage;
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
@@ -33,28 +31,30 @@ public class FilmSevice {
         this.likeStorage = likeStorage;
     }
 
-    public Film addFilmInStorage(Film film) {
+    public Film addFilm(Film film) {
 
-        storage.add(film);
+        validate(film);
+        storage.save(film);
         genreStorage.saveGenres(film);
+
         log.debug("Фильм добавлен " + film);
         return film;
 
     }
 
-    public Film updateFilmInStorage(Film film) {
+    public Film updateFilm(Film film) {
 
-        storage.getFilm(film.getId());
+        storage.loadFilm(film.getId());
         validate(film);
         storage.update(film);
         genreStorage.saveGenres(film);
+
         log.debug("Фильм обновлён " + film);
         return film;
     }
 
-    public List<Film> getFilmFromStorage() {
-        List<Film> films = storage.getAll();
-
+    public List<Film> getFilms() {
+        List<Film> films = storage.loadFilms();
         genreStorage.loadGenres(films);
         likeStorage.loadLike(films);
 
@@ -74,20 +74,15 @@ public class FilmSevice {
     }
 
     public List<Film> getPopular(int count) {
-        List<Film> films = storage.getAll();
-
+        List<Film> films = storage.loadPopularFilms(count);
         genreStorage.loadGenres(films);
         likeStorage.loadLike(films);
 
-        return films.stream()
-                .sorted(new FilmComparatorByLikeCount())
-                .limit(count)
-                .collect(Collectors.toList());
+        return films;
     }
 
     public Film getFilm(long id) {
-        Film film = storage.getFilm(id);
-
+        Film film = storage.loadFilm(id);
         genreStorage.loadGenres(List.of(film));
         likeStorage.loadLike(List.of(film));
 

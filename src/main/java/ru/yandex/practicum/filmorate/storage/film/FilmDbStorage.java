@@ -29,8 +29,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void add(Film film) {
-        String sql = "INSERT INTO \"Film\" (\"name\", \"description\", \"release_date\", \"duration\", \"rating\")\n" + "values (?, ?, ?, ?, ?)";
+    public void save(Film film) {
+        String sql = "INSERT INTO \"Film\" (\"name\", \"description\", \"release_date\", \"duration\", \"rating\")\n"
+                + "values (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -52,14 +53,21 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void update(Film film) {
-        String sql = "UPDATE \"Film\"\n" + "SET \"name\"        = ?,\n" + "    \"description\" = ?,\n" + "    \"duration\"    = ?,\n" + "    \"release_date\"=?,\n" + "    \"rating\"      = ?\n" + "WHERE \"id\" = ?";
+        String sql = "UPDATE \"Film\"\n" + "SET \"name\"        = ?,\n" + "    \"description\" = ?,\n" +
+                "    \"duration\"    = ?,\n" + "    \"release_date\"=?,\n" + "    \"rating\"      = ?\n" +
+                "WHERE \"id\" = ?";
 
-        jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getDuration().toMinutes(), Date.valueOf(film.getReleaseDate()), film.getMpa().getId(), film.getId());
+        jdbcTemplate.update(sql, film.getName(),
+                film.getDescription(),
+                film.getDuration().toMinutes(),
+                Date.valueOf(film.getReleaseDate()),
+                film.getMpa().getId(),
+                film.getId());
 
     }
 
     @Override
-    public List<Film> getAll() {
+    public List<Film> loadFilms() {
         String sql = "SELECT F.*, R.\"name\" AS \"rating_name\", R.\"id\" AS \"rating_id\"\n" +
                 "FROM \"Film\" F\n" +
                 "         JOIN \"Rating\" R ON F.\"rating\" = R.\"id\"";
@@ -69,7 +77,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
     @Override
-    public Film getFilm(long id) {
+    public Film loadFilm(long id) {
         String sql = "SELECT F.*, R.\"name\" AS \"rating_name\", R.\"id\" AS \"rating_id\"\n" +
                 "FROM \"Film\" F\n" +
                 "         JOIN \"Rating\" R ON F.\"rating\" = R.\"id\"\n" +
@@ -80,6 +88,20 @@ public class FilmDbStorage implements FilmStorage {
         } catch (DataAccessException e) {
             throw new NotFoundException(e.getMessage());
         }
+    }
+
+    @Override
+    public List<Film> loadPopularFilms(int count) {
+        String sql = "SELECT F.*, R.\"name\" AS \"rating_name\", R.\"id\" AS \"rating_id\"\n" +
+                "FROM \"Film\" F\n" +
+                "         JOIN \"Rating\" R ON F.\"rating\" = R.\"id\"\n" +
+                "         LEFT JOIN (SELECT \"film_id\", count(*) as countLike FROM \"User_like\" " +
+                "GROUP BY \"film_id\") AS ULC ON \"film_id\" = F.\"id\"\n" +
+                "ORDER BY countLike DESC\n" +
+                "LIMIT ?\n";
+
+
+        return jdbcTemplate.query(sql, (resultSet, rowNum) -> extractedFilm(resultSet), count);
     }
 
     private Film extractedFilm(ResultSet resultSet) throws SQLException {
