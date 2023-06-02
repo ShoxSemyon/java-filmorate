@@ -15,10 +15,7 @@ import ru.yandex.practicum.filmorate.utils.GenresComparator;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.function.UnaryOperator.identity;
@@ -88,12 +85,16 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public void batchUpdateGenres(List<Genre> genres, long filmId) {
+    public void saveGenres(Film film) {
+        if (film.getGenres() == null) return;
+
+        List<Genre> genres = new ArrayList<>(film.getGenres());
+
         String sql = "INSERT INTO \"Film_genre\"(\"film_id\", \"genre_id\")\n" + "VALUES (?,?)";
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, filmId);
+                ps.setLong(1, film.getId());
                 ps.setLong(2, genres.get(i).getId());
             }
 
@@ -102,7 +103,7 @@ public class GenreDbStorage implements GenreStorage {
                 return genres.size();
             }
         });
-        log.info("Список жанров обнавлён фильма с id=" + filmId);
+        log.info("Список жанров обнавлён фильма с id=" + film.getId());
     }
 
     @Override

@@ -12,7 +12,7 @@ public interface GenreStorage {
 
     List<Genre> getAllGenre();
 
-    void batchUpdateGenres(List<Genre> genres, long filmId);
+    void saveGenres(Film film);
 
     void batchDeleteGenres(long filmId);
 }
