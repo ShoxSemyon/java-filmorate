@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.utils.FilmComparatorByLikeCount;
 
-import java.time.chrono.ChronoLocalDate;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class FilmSevice {
 
     private static final int MAX_NAME_SIZE = 200;
-    private static final ChronoLocalDate FILM_BIRTHDAY = ;
+    private static final LocaleDate FILM_BIRTHDAY = LocalDate.of();
     private final FilmStorage storage;
     private final GenreStorage genreStorage;
     private final LikeStorage likeStorage;
@@ -109,7 +109,7 @@ public class FilmSevice {
             throw new ValidationException("Film duration invalid");
         }
         final Rating mpa = film.getMpa();
-        if (mpa == null || mpa.getId() ==0) {
+        if (mpa == null || mpa.getId() == 0) {
             throw new ValidationException("Film mpa invalid");
         }
     }
