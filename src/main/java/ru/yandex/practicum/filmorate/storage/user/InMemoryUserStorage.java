@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -46,6 +47,31 @@ public class InMemoryUserStorage implements UserStorage {
             throw new NotFoundException(String.format("Ползователь c Id = %s не найден", id));
         }
 
+    }
+
+    @Override
+    public void addFriendSiquence(long userId, long friendId) {
+        if (getUser(userId).getMyFriend().containsKey(friendId)
+                && getUser(friendId).getMyFriend().containsKey(userId)) {
+
+            getUser(userId).setFriend(friendId, FriendshipStatus.CONFIRMED);
+            getUser(friendId).setFriend(userId, FriendshipStatus.CONFIRMED);
+        } else {
+            getUser(userId).setFriend(friendId, FriendshipStatus.UNCONFIRMED);
+            getUser(friendId).setFriend(userId, FriendshipStatus.UNCONFIRMED);
+        }
+    }
+
+    @Override
+    public Map<Long, FriendshipStatus> getFriendSiquence(long userId) {
+        return null;
+    }
+
+
+    @Override
+    public void deleteFriendSiquence(long userId, long friendId) {
+        users.get(userId).deleteFriend(friendId);
+        users.get(friendId).deleteFriend(userId);
     }
 
 }

@@ -28,12 +28,20 @@ public class Film {
     private LocalDate releaseDate;
 
     private Duration duration;
-
     private Set<Long> userLikeIds;
+
+    private Set<Genre> genres;
+
+    @NotNull
+    private Rating mpa;
 
     public boolean setLike(Long id) {
 
         return userLikeIds.add(id);
+    }
+
+    public void setGenre(Genre genre) {
+        genres.add(genre);
     }
 
     public boolean deleteLike(long id) {

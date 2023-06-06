@@ -26,7 +26,7 @@ public class FilmController {
     public Film addFilm(@Valid @RequestBody Film film) {
         log.debug("Начало добавление фильма с параметрами {}", film);
 
-        return service.addFilmInStorage(film);
+        return service.addFilm(film);
     }
 
 
@@ -34,14 +34,14 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.debug("Начало обновление фильма с параметрами {}", film);
 
-        return service.updateFilmInStorage(film);
+        return service.updateFilm(film);
     }
 
     @GetMapping
     public List<Film> getFilms() {
         log.debug("Начало запроса всех фильмов");
 
-        return service.getFilmFromStorage();
+        return service.getFilms();
     }
 
     @GetMapping("/{id}")
